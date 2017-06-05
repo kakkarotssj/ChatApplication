@@ -1,5 +1,5 @@
 #A NAIVE APPROACH FOR CHAT USING TCP CONNECTION
 
-#INSTRUCTIONS
+INSTRUCTIONS
 First run server file 
 then run clients.
