@@ -37,8 +37,8 @@ def accept_connection1(s, thread_lock):
                 conn1.sendall("Enter your nickname ::: ")
                 nickname1 = conn1.recv(1024)
                 conn1.sendall("\t\t\t\t\t\t" + nickname1 + ", Welcome to CHAT ROOM")
-                print str(nickname1) + " with IP address " + str(addr1[0]) + " added at " + \
-                str(connection_time) + " on port number " + str(addr1[1])
+                print str(nickname1) + " with IP address " + str(addr1[0]) + " added at " + str(connection_time) \
+                    + " on port number " + str(addr1[1])
                 close_thread1 = True
         except:
             pass
@@ -60,8 +60,8 @@ def accept_connection2(s, thread_lock):
                 conn2.sendall("Enter your nickname ::: ")
                 nickname2 = conn2.recv(1024)
                 conn2.sendall("\t\t\t\t\t\t" + nickname2 + ", Welcome to CHAT ROOM")
-                print str(nickname2) + " with IP address " + str(addr2[0]) + " added at " + \
-                str(connection_time) + " on port number " + str(addr2[1])
+                print str(nickname2) + " with IP address " + str(addr2[0]) + " added at " + str(connection_time) \
+                    + " on port number " + str(addr2[1])
                 close_thread2 = True
         except:
             pass
@@ -71,30 +71,34 @@ def accept_connection2(s, thread_lock):
 
 def handle_messages1to2():
     global close_thread3
+    global close_thread4
     while not close_thread3:
         try:
             message1 = conn1.recv(1024)
-            if message1 != "":
+            if message1 != "" and message1 != "Quit":
                 print str(nickname1) + " -> " + str(message1)
                 conn2.sendall(str(nickname1) + " -> " + str(message1))
             if message1 == "Quit":
                 conn1.sendall("Quit")
                 close_thread3 = True
+                close_thread4 = True
         except:
             pass
 
 
 def handle_messages2to1():
     global close_thread4
+    global close_thread3
     while not close_thread4:
         try:
             message2 = conn2.recv(1024)
-            if message2 != "":
+            if message2 != "" and message2 != "Quit":
                 print str(nickname2) + " -> " + str(message2)
                 conn1.sendall(str(nickname2) + " -> " + str(message2))
             if message2 == "Quit":
-                conn1.sendall("Quit")
+                conn2.sendall("Quit")
                 close_thread4 = True
+                close_thread3 = True
         except:
             pass
 
@@ -108,13 +112,13 @@ def main():
     global close_thread1
     global close_thread2
 
+    print "\t\t\t\t\t\t ***** CHAT SERVER STARTED *****"
+
     thread_lock = threading.Lock()
     thread1 = threading.Thread(target=accept_connection1, args=(s, thread_lock))
     thread1.start()
     thread2 = threading.Thread(target=accept_connection2, args=(s, thread_lock))
     thread2.start()
-
-    print "\t\t\t\t\t\t ***** CHAT SERVER STARTED *****"
 
     thread1.join()
     thread2.join()
