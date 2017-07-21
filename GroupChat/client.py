@@ -1,43 +1,42 @@
-import socket
 import threading
+import socket
+
 
 SERVER = ("127.0.0.1", 5000)
 
-close_thread = False
 
+class ReceiveMessages(threading.Thread):
+    def __init__(self, s):
+        threading.Thread.__init__(self)
+        self.socket_connection = s
 
-def receive_messages(s, thread_lock):
-    global close_thread
-    while not close_thread:
-        try:
-            message = s.recv(1024)
-            thread_lock.acquire()
-            if message != "Quit":
+    def run(self):
+        while True:
+            try:
+                message = self.socket_connection.recv(1024)
                 print message
-            else:
-                close_thread = True
-            thread_lock.release()
-        except:
-            pass
+            except:
+                pass
 
 
 def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.connect(SERVER)
 
-    thread_lock = threading.Lock()
-    thread1 = threading.Thread(target=receive_messages, args=(s, thread_lock))
-    thread1.start()
+    greeting_message = s.recv(1024)
+    print greeting_message
+    user_name = raw_input()
+    s.send(user_name)
+    msg = s.recv(1024)
+    print "\t\t\t " + user_name + " , " + msg
 
-    stop_sending_message = False
-    while not stop_sending_message:
+    receive_messages = ReceiveMessages(s)
+    receive_messages.start()
+
+    while True:
         message = raw_input()
-        s.sendall(message)
-        if message == "Quit":
-            stop_sending_message = True
-
-    thread1.join()
-    s.close()
+        s.send(message)
 
 
 if __name__ == "__main__":
