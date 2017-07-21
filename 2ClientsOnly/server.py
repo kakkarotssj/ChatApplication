@@ -1,139 +1,62 @@
-import socket
 import threading
+import socket
 import time
-
-#GLOABAL CONSTANTS
 
 HOST = "127.0.0.1"
 PORT = 5000
-
-#GLOBAL VARIABLES
-
-close_thread1 = False
-close_thread2 = False
-close_thread3 = False
-close_thread4 = False
-
-conn1 = None
-addr1 = None
-conn2 = None
-addr2 = None
-
-nickname1 = None
-nickname2 = None
+connections = []
+chat_threads = []
 
 
-def accept_connection1(s, thread_lock):
-    global conn1
-    global addr1
-    global nickname1
-    global close_thread1
-    while not close_thread1:
-        thread_lock.acquire()
-        try:
-            conn1, addr1 = s.accept()
-            if addr1 is not None:
-                connection_time = time.ctime(time.time())
-                conn1.sendall("Enter your nickname ::: ")
-                nickname1 = conn1.recv(1024)
-                conn1.sendall("\t\t\t\t\t\t" + nickname1 + ", Welcome to CHAT ROOM")
-                print str(nickname1) + " with IP address " + str(addr1[0]) + " added at " + str(connection_time) \
-                    + " on port number " + str(addr1[1])
-                close_thread1 = True
-        except:
-            pass
-        finally:
-            thread_lock.release()
+class ClientObject(threading.Thread):
+    def __init__(self, conn, client_index, user_name):
+        threading.Thread.__init__(self)
+        self.connection = conn
+        self.client_index = client_index
+        self.user_name = user_name
 
+    def run(self):
+        global close_thread
+        while True:
+            if self.client_index == 1:
+                try:
+                    message = chat_threads[1].connection.recv(1024)
+                    chat_threads[0].connection.send(chat_threads[1].user_name + " -> " + message)
+                except:
+                    pass
 
-def accept_connection2(s, thread_lock):
-    global conn2
-    global addr2
-    global nickname2
-    global close_thread2
-    while not close_thread2:
-        thread_lock.acquire()
-        try:
-            conn2, addr2 = s.accept()
-            if addr2 is not None:
-                connection_time = time.ctime(time.time())
-                conn2.sendall("Enter your nickname ::: ")
-                nickname2 = conn2.recv(1024)
-                conn2.sendall("\t\t\t\t\t\t" + nickname2 + ", Welcome to CHAT ROOM")
-                print str(nickname2) + " with IP address " + str(addr2[0]) + " added at " + str(connection_time) \
-                    + " on port number " + str(addr2[1])
-                close_thread2 = True
-        except:
-            pass
-        finally:
-            thread_lock.release()
-
-
-def handle_messages1to2():
-    global close_thread3
-    global close_thread4
-    while not close_thread3:
-        try:
-            message1 = conn1.recv(1024)
-            if message1 != "" and message1 != "Quit":
-                print str(nickname1) + " -> " + str(message1)
-                conn2.sendall(str(nickname1) + " -> " + str(message1))
-            if message1 == "Quit":
-                conn1.sendall("Quit")
-                close_thread3 = True
-                close_thread4 = True
-        except:
-            pass
-
-
-def handle_messages2to1():
-    global close_thread4
-    global close_thread3
-    while not close_thread4:
-        try:
-            message2 = conn2.recv(1024)
-            if message2 != "" and message2 != "Quit":
-                print str(nickname2) + " -> " + str(message2)
-                conn1.sendall(str(nickname2) + " -> " + str(message2))
-            if message2 == "Quit":
-                conn2.sendall("Quit")
-                close_thread4 = True
-                close_thread3 = True
-        except:
-            pass
+            if self.client_index == 2:
+                try:
+                    message = chat_threads[0].connection.recv(1024)
+                    chat_threads[1].connection.send(chat_threads[0].user_name + " -> " + message)
+                except:
+                    pass
 
 
 def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((HOST, PORT))
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind((HOST, PORT))
+    print "\t\t\t\t\t\t *****CHAT SERVER STARTED******"
     s.listen(2)
 
-    global close_thread1
-    global close_thread2
+    number_of_clients = 0
+    while number_of_clients < 2:
+        connection, address = s.accept()
 
-    print "\t\t\t\t\t\t ***** CHAT SERVER STARTED *****"
+        print str(address[0]) + " connected to our server at " + str(time.ctime(time.time()))
+        connection.send("Hello User, Please Enter your nickname")
+        user_name = connection.recv(1024)
 
-    thread_lock = threading.Lock()
-    thread1 = threading.Thread(target=accept_connection1, args=(s, thread_lock))
-    thread1.start()
-    thread2 = threading.Thread(target=accept_connection2, args=(s, thread_lock))
-    thread2.start()
+        number_of_clients += 1
+        connections.append(connection)
+        chat_thread = ClientObject(connection, number_of_clients, user_name)
+        chat_threads.append(chat_thread)
 
-    thread1.join()
-    thread2.join()
-
-    thread3 = threading.Thread(target=handle_messages1to2)
-    thread3.start()
-    thread4 = threading.Thread(target=handle_messages2to1)
-    thread4.start()
-
-    thread3.join()
-    thread4.join()
-
-    s.close()
-
+    for i in chat_threads:
+        i.start()
 
 if __name__ == "__main__":
     main()
+
 
