@@ -31,8 +31,7 @@ def main():
     receive_messages = ReceiveMessages(s)
     receive_messages.start()
 
-    message = ""
-    while message != "Quit":
+    while True:
         message = raw_input()
         s.send(message)
 
