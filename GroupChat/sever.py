@@ -39,14 +39,15 @@ def handle_messages():
                         connection.sendall(message)
             except:
                 pass
-            else:
-                index += 1
+            index += 1
+            if index == len(clients_connections):
+                index = 0
 
 
 def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(SERVER)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind(SERVER)
     s.listen(5)
 
     print "\t\t\t\t\t\t *****CHAT SERVER STARTED******"
