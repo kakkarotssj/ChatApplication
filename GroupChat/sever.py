@@ -16,12 +16,9 @@ class ThreadObject(threading.Thread):
 
     def run(self):
         while True:
-            try:
-                message = self.connection.recv(1024)
-                for conn in connections:
-                    conn.send(str(self.user_name) + " -> " + message)
-            except:
-                pass
+            message = self.connection.recv(1024)
+            for conn in connections:
+                conn.send(str(self.user_name) + " -> " + message)
 
 
 def main():
