@@ -12,11 +12,8 @@ class ReceiveMessages(threading.Thread):
 
     def run(self):
         while True:
-            try:
-                message = self.socket_connection.recv(1024)
-                print message
-            except:
-                pass
+            message = self.socket_connection.recv(1024)
+            print message
 
 
 def main():
