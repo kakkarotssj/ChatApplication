@@ -9,26 +9,35 @@ chat_threads = []
 
 
 class ClientObject(threading.Thread):
-    def __init__(self, conn, client_index, user_name):
+    def __init__(self, conn, client_index, param_user_name):
         threading.Thread.__init__(self)
         self.connection = conn
         self.client_index = client_index
-        self.user_name = user_name
+        self.user_name = param_user_name
 
     def run(self):
-        global close_thread
         while True:
             if self.client_index == 1:
                 try:
                     message = chat_threads[1].connection.recv(1024)
-                    chat_threads[0].connection.send(chat_threads[1].user_name + " -> " + message)
+                    if message == "quit":
+                        chat_threads[1].connection.send(message)
+                        chat_threads[0].connection.send("Other user has closed the connection.")
+                    else:
+                        if message != "":
+                            chat_threads[0].connection.send(chat_threads[1].user_name + " -> " + message)
                 except:
                     pass
 
             if self.client_index == 2:
                 try:
                     message = chat_threads[0].connection.recv(1024)
-                    chat_threads[1].connection.send(chat_threads[0].user_name + " -> " + message)
+                    if message == "quit":
+                        chat_threads[0].connection.send(message)
+                        chat_threads[1].connection.send("Other user has closed the connection.")
+                    else:
+                        if message != "":
+                            chat_threads[1].connection.send(chat_threads[0].user_name + " -> " + message)
                 except:
                     pass
 
@@ -58,5 +67,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

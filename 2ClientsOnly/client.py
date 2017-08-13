@@ -1,6 +1,7 @@
 import threading
 import socket
 
+
 SERVER = ("127.0.0.1", 5000)
 
 
@@ -12,8 +13,11 @@ class ReceiveMessages(threading.Thread):
     def run(self):
         while True:
             try:
-                message = self.socket_connection.recv(1024)
-                print message
+                msg = self.socket_connection.recv(1024)
+                if msg != "quit":
+                    print msg
+                else:
+                    break
             except:
                 pass
 
@@ -31,10 +35,10 @@ def main():
     receive_messages = ReceiveMessages(s)
     receive_messages.start()
 
-    while True:
+    message = ""
+    while message != "quit":
         message = raw_input()
         s.send(message)
-
 
 if __name__ == "__main__":
     main()
