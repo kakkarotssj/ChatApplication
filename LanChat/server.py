@@ -125,7 +125,6 @@ class HandleConnection(threading.Thread):
                 if count == 0:
                     self.local_conn.send("Congratulations. You are registered with User Name " + str(self.user_name) +
                                          ". Just use " + str(self.user_name) + "next time to login.")
-                    self.local_db_manager.insert_data("users_online", self.user_name)
                     break
 
             user_data["user_name"] = self.user_name

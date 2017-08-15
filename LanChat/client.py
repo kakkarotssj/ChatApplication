@@ -169,7 +169,7 @@ def main():
                     users_online = []
                     while not again:
                         user_online = socket_object.recv(1024)
-                        if users_online == "exit":
+                        if user_online == "exit":
                             break
                         else:
                             users_online.append(user_online)
