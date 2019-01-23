@@ -6,11 +6,15 @@ class Receiver(threading.Thread):
 	def __init__(self, socket_object):
 		threading.Thread.__init__(self)
 		self.socket_object = socket_object
+		self.msg = None
 
 	def run(self):
 		while True:
 			try:
-				msg = self.socket_object.recv(BUFFER_SIZE)
-				print msg
+				self.msg = self.socket_object.recv(BUFFER_SIZE)
+				print self.msg
 			except socket.error:
-				print "Error receiving messages."
+				pass
+
+	def get_msg(self):
+		return self.msg
