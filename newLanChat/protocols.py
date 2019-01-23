@@ -1,5 +1,8 @@
 class Client2Server(dict):
 	def __init__(self):
+		self.renew_protocol()
+
+	def renew_protocol(self):
 		self["is_login"] = False
 		self["login_credentials"] = {
 			"username" = None,
@@ -24,7 +27,7 @@ class Client2Server(dict):
 
 		self["is_dbquery"] = False
 		self["dbquery"] = {
-			"show_online_users" = False,
+			"query" = False,
 		}
 
 	def setup_login(self, login_credentials):
@@ -46,13 +49,19 @@ class Client2Server(dict):
 		self["message"]["content"] = message["content"]
 		self["message"]["receiver"] = message["receiver"]
 
-	def setup_dbquery(self, dbquery):
-		self["is_dbquery"] = True
-		self["dbquery"]["show_online_users"] = True
+	def setup_dbquery(self, query):
+		if query in ["show_online_users"]:
+			self["is_dbquery"] = True
+			self["dbquery"]["query"] = query
+			return "success"
+		else:
+			return "No matching query"
 
 
 class Server2Client(dict):
 	def __init__(self):
+		self["receiver_username"] = None
+
 		self["is_error"] = False
 		self["error"] = None
 
@@ -63,6 +72,9 @@ class Server2Client(dict):
 		self["dbquery_result"] = {
 			"online_users" = None
 		}
+
+	def setup_receiver_username(self, receiver_username):
+		self["receiver_username"] = "receiver_username"
 
 	def setup_error(self, error):
 		self["is_error"] = True
