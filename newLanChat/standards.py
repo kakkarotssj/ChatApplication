@@ -1,1 +1,2 @@
 BUFFER_SIZE = 1024
+SERVER_ADDRESS = ("localhost", 5000)
